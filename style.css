@@ -1,0 +1,301 @@
+:root {
+  --bg: #1B2B1E;
+  --bg-soft: #223524;
+  --surface: #F6F3E9;
+  --green: #7CA456;
+  --green-deep: #3F5942;
+  --rust: #C1542C;
+  --ink: #1B2B1E;
+  --ink-soft: rgba(246, 243, 233, 0.62);
+  --line: rgba(246, 243, 233, 0.16);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--surface);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* Faint vein texture behind everything */
+.vein-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(124,164,86,0.06), transparent 40%),
+    radial-gradient(circle at 80% 75%, rgba(124,164,86,0.05), transparent 45%);
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 56px 24px 80px;
+}
+
+/* ---- Masthead ---- */
+.masthead {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: 48px;
+}
+
+.masthead__mark {
+  font-size: 22px;
+  color: var(--green);
+  line-height: 1;
+}
+
+.masthead__title {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+  margin: 0;
+  color: var(--surface);
+}
+
+.masthead__sub {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  margin: 2px 0 0;
+  text-transform: uppercase;
+}
+
+/* ---- Upload slide ---- */
+.slide__frame {
+  position: relative;
+  border: 1px dashed rgba(246,243,233,0.28);
+  border-radius: 4px;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: var(--bg-soft);
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.slide__frame:hover {
+  border-color: rgba(124,164,86,0.5);
+}
+
+.slide__frame.dragging {
+  border-color: var(--green);
+  background: rgba(124,164,86,0.08);
+}
+
+.slide__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: rgba(246,243,233,0.5);
+  text-align: center;
+  padding: 0 24px;
+}
+
+.slide__empty svg { color: var(--green); opacity: 0.85; }
+
+.slide__instruction {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--surface);
+  margin: 4px 0 0;
+}
+
+.slide__hint {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.slide__preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.slide__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  color: rgba(246,243,233,0.7);
+  font-size: 13px;
+}
+
+.loading-pulse {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid rgba(124,164,86,0.3);
+  border-top-color: var(--green);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.btn-clear {
+  display: block;
+  margin: 16px auto 0;
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  text-decoration: underline;
+  text-decoration-color: rgba(246,243,233,0.25);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.btn-clear:hover { color: var(--surface); }
+.btn-clear:focus-visible, .slide__frame:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* ---- Result ---- */
+.result {
+  margin-top: 40px;
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 6px;
+  padding: 28px 26px;
+  animation: rise 0.4s ease;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result__eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--green-deep);
+}
+
+.result__name {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 26px;
+  margin: 6px 0 0;
+  line-height: 1.2;
+}
+
+.result__name.is-disease { color: var(--rust); }
+.result__name.is-healthy { color: var(--green-deep); }
+
+.gauge { margin-top: 24px; }
+
+.gauge__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.gauge__label {
+  font-size: 12.5px;
+  color: rgba(27,43,30,0.55);
+}
+
+.gauge__value {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.gauge__track {
+  position: relative;
+  height: 10px;
+  background: rgba(27,43,30,0.08);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.gauge__fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--green) 0%, var(--green-deep) 100%);
+  border-radius: 5px;
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.gauge__ticks {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 24%;
+}
+
+.gauge__ticks span {
+  width: 1px;
+  background: rgba(246,243,233,0.5);
+  height: 100%;
+}
+
+.alts { margin-top: 26px; border-top: 1px solid rgba(27,43,30,0.1); padding-top: 16px; }
+
+.alts__label {
+  font-size: 11.5px;
+  color: rgba(27,43,30,0.5);
+  margin: 0 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.alts__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+
+.alts__list li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: rgba(27,43,30,0.7);
+}
+
+.alts__list li span:last-child { color: rgba(27,43,30,0.45); }
+
+/* ---- Error ---- */
+.error {
+  margin-top: 24px;
+  background: rgba(193,84,44,0.12);
+  border: 1px solid rgba(193,84,44,0.4);
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: #E6A98B;
+}
+
+/* ---- Footer ---- */
+.foot {
+  margin-top: 56px;
+  text-align: center;
+  font-size: 11.5px;
+  color: rgba(246,243,233,0.3);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result, .loading-pulse, .gauge__fill { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 36px 16px 60px; }
+  .masthead__title { font-size: 23px; }
+}
