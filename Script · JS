@@ -1,0 +1,135 @@
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const emptyState = document.getElementById('emptyState');
+const previewImg = document.getElementById('previewImg');
+const loadingState = document.getElementById('loadingState');
+const clearBtn = document.getElementById('clearBtn');
+
+const resultSection = document.getElementById('result');
+const resultEyebrow = document.getElementById('resultEyebrow');
+const resultName = document.getElementById('resultName');
+const gaugeFill = document.getElementById('gaugeFill');
+const gaugeValue = document.getElementById('gaugeValue');
+const altsList = document.getElementById('altsList');
+
+const errorBox = document.getElementById('errorBox');
+const errorText = document.getElementById('errorText');
+
+dropZone.setAttribute('tabindex', '0');
+dropZone.setAttribute('role', 'button');
+dropZone.setAttribute('aria-label', 'Upload a leaf image');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+});
+
+['dragenter', 'dragover'].forEach(evt =>
+  dropZone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragging');
+  })
+);
+
+['dragleave', 'drop'].forEach(evt =>
+  dropZone.addEventListener(evt, (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragging');
+  })
+);
+
+dropZone.addEventListener('drop', (e) => {
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files[0]) handleFile(fileInput.files[0]);
+});
+
+clearBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  resetUI();
+});
+
+function resetUI() {
+  fileInput.value = '';
+  previewImg.hidden = true;
+  emptyState.hidden = false;
+  loadingState.hidden = true;
+  clearBtn.hidden = true;
+  resultSection.hidden = true;
+  errorBox.hidden = true;
+}
+
+function handleFile(file) {
+  if (!file.type.startsWith('image/')) {
+    showError('That file is not an image. Choose a JPG or PNG of a leaf.');
+    return;
+  }
+
+  errorBox.hidden = true;
+  resultSection.hidden = true;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    previewImg.src = e.target.result;
+    previewImg.hidden = false;
+    emptyState.hidden = true;
+    loadingState.hidden = false;
+    clearBtn.hidden = false;
+  };
+  reader.readAsDataURL(file);
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  fetch('/predict', { method: 'POST', body: formData })
+    .then(res => res.json())
+    .then(data => {
+      loadingState.hidden = true;
+      if (data.error) {
+        showError(data.error);
+        return;
+      }
+      showResult(data);
+    })
+    .catch(() => {
+      loadingState.hidden = true;
+      showError('Could not reach the diagnosis server. Check that app.py is running.');
+    });
+}
+
+function showResult(data) {
+  const isHealthy = data.raw_class.toLowerCase().includes('healthy');
+
+  resultEyebrow.textContent = isHealthy ? 'Clean reading' : 'Diagnosis';
+  resultName.textContent = data.prediction;
+  resultName.className = 'result__name ' + (isHealthy ? 'is-healthy' : 'is-disease');
+
+  gaugeValue.textContent = data.confidence + '%';
+
+  altsList.innerHTML = '';
+  data.top3.slice(1).forEach(item => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${item.class}</span><span>${item.confidence}%</span>`;
+    altsList.appendChild(li);
+  });
+
+  resultSection.hidden = false;
+
+  // Animate the gauge fill on next frame
+  gaugeFill.style.width = '0%';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      gaugeFill.style.width = data.confidence + '%';
+    });
+  });
+
+  resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showError(msg) {
+  errorText.textContent = msg;
+  errorBox.hidden = false;
+}
